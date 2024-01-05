@@ -19,18 +19,18 @@ def get_version(rel_path: str) -> str:
 
 
 setup(
-    name='chris-plugin-template',
-    version=get_version('app.py'),
-    description='A ChRIS DS plugin template',
+    name='n4wrapper',
+    version=get_version('n4wrapper.py'),
+    description='A ChRIS plugin wrapper for N4BiasFieldCorrection',
     author='FNNDSC',
     author_email='dev@babyMRI.org',
-    url='https://github.com/FNNDSC/python-chrisapp-template',
-    py_modules=['app'],
+    url='https://github.com/FNNDSC/pl-N4BiasFieldCorrection',
+    py_modules=['n4wrapper'],
     install_requires=['chris_plugin'],
     license='MIT',
     entry_points={
         'console_scripts': [
-            'commandname = app:main'
+            'n4wrapper = n4wrapper:main'
         ]
     },
     classifiers=[
@@ -38,11 +38,5 @@ setup(
         'Topic :: Scientific/Engineering',
         'Topic :: Scientific/Engineering :: Bio-Informatics',
         'Topic :: Scientific/Engineering :: Medical Science Apps.'
-    ],
-    extras_require={
-        'none': [],
-        'dev': [
-            'pytest~=7.1'
-        ]
-    }
+    ]
 )

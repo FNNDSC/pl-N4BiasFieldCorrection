@@ -17,33 +17,9 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
-    name: Unit tests
-    if: false  # delete this line to enable automatic testing
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - name: Build
-        uses: docker/build-push-action@v5
-        with:
-          build-args: extras_require=dev
-          context: .
-          load: true
-          push: false
-          tags: "localhost/local/app:dev"
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - name: Run pytest
-        run: |
-          docker run -v "$GITHUB_WORKSPACE:/app:ro" -w /app localhost/local/app:dev \
-            pytest -o cache_dir=/tmp/pytest
-
   build:
     name: Build
-    if: false  # delete this line and uncomment the line below to enable automatic builds
-    # if: github.event_name == 'push' || github.event_name == 'release'
-    # needs: [ test ]  # uncomment to require passing tests
+    if: github.event_name == 'push' || github.event_name == 'release'
     runs-on: ubuntu-22.04
 
     steps:
@@ -105,37 +81,6 @@ jobs:
           tags: ${{ steps.info.outputs.local_tag }}
           load: true
           cache-from: type=gha
-      # If you have a directory called examples/incoming/ and examples/outgoing/, then
-      # run your ChRIS plugin with no parameters, and assert that it creates all the files
-      # which are expected. File contents are not compared.
-      - name: Run examples
-        id: run_examples
-        run: |
-          if ! [ -d 'examples/incoming/' ] || ! [ -d 'examples/outgoing/' ]; then
-            echo "No examples."
-            exit 0
-          fi
-        
-          dock_image=${{ steps.info.outputs.local_tag }}
-          output_dir=$(mktemp -d)
-          cmd=$(docker image inspect -f '{{ (index .Config.Cmd 0) }}' $dock_image)
-          docker run --rm -u "$(id -u):$(id -g)" \
-            -v "$PWD/examples/incoming:/incoming:ro" \
-            -v "$output_dir:/outgoing:rw" \
-            $dock_image $cmd /incoming /outgoing
-          
-          for expected_file in $(find examples/outgoing -type f); do
-            fname="${expected_file##*/}"
-            out_path="$output_dir/$fname"
-            printf "Checking output %s exists..." "$out_path"
-            if [ -f "$out_path" ]; then
-              echo "ok"
-            else
-              echo "not found"
-              exit 1
-            fi
-          done
-
       - name: Login to DockerHub
         if: (github.event_name == 'push' || github.event_name == 'release') && contains(steps.info.outputs.tags_csv, 'docker.io')
         uses: docker/login-action@v3
@@ -156,8 +101,8 @@ jobs:
           context: .
           file: ./Dockerfile
           tags: ${{ steps.info.outputs.tags_csv }}
-          # if non-x86_84 architectures are supported, add them here
-          platforms: linux/amd64  #,linux/arm64,linux/ppc64le
+          # linux/ppc64le not working, see https://github.com/ANTsX/ANTs/issues/1644
+          platforms: linux/amd64,linux/arm64
           push: ${{ steps.info.outputs.push }}
           cache-to: type=gha,mode=max
 
