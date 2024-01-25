@@ -5,8 +5,7 @@ LABEL org.opencontainers.image.authors="FNNDSC <dev@babyMRI.org>" \
       org.opencontainers.image.description="A ChRIS plugin wrapper for N4BiasFieldCorrection"
 
 # install N4BiasFieldCorrection
-COPY --from=docker.io/fnndsc/n4biasfieldcorrection:2.5.0 /opt/ants /opt/ants
-ENV PATH=/opt/ants/bin:$PATH LD_LIBRARY_PATH=/opt/ants/lib:$LD_LIBRARY_PATH
+COPY --from=docker.io/fnndsc/n4biasfieldcorrection:2.5.0 /usr/local/bin/N4BiasFieldCorrection /usr/local/bin/N4BiasFieldCorrection
 
 ARG SRCDIR=/usr/local/src/pl-N4BiasFieldCorrection
 WORKDIR ${SRCDIR}
