@@ -1,7 +1,7 @@
-FROM docker.io/python:3.12.1-slim-bookworm
+FROM docker.io/python:3.12.7-slim-bookworm
 
 # install N4BiasFieldCorrection
-COPY --from=docker.io/fnndsc/n4biasfieldcorrection:2.5.0 /usr/local/bin/N4BiasFieldCorrection /usr/local/bin/N4BiasFieldCorrection
+COPY --from=docker.io/fnndsc/n4biasfieldcorrection:2.5.3 /usr/local/bin/N4BiasFieldCorrection /usr/local/bin/N4BiasFieldCorrection
 
 ARG SRCDIR=/usr/local/src/pl-N4BiasFieldCorrection
 WORKDIR ${SRCDIR}

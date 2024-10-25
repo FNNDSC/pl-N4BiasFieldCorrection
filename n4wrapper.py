@@ -11,7 +11,7 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 from chris_plugin import chris_plugin, PathMapper
 from loguru import logger
 
-__version__ = '2.5.0.2'
+__version__ = '2.5.3.0'
 
 DISPLAY_TITLE = r"""
  _   _   ___ ______ _           ______ _      _     _ _____                          _   _             
