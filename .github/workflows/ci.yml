@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             docker.io/${{ github.repository }}
@@ -25,26 +25,26 @@ jobs:
             type=pep440,pattern={{version}}
             type=raw,value=latest,enable={{is_default_branch}}
         # QEMU is used for non-x86_64 builds
-      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-qemu-action@v4
         # buildx adds additional features to docker build
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
         with:
           driver-opts: network=host
       - name: Login to DockerHub
         if: github.event_name == 'push' && contains(steps.meta.outputs.tags, 'docker.io')
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Login to GitHub Container Registry
         if: github.event_name == 'push' && contains(steps.meta.outputs.tags, 'ghcr.io')
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         if: github.event_name == 'push'
         with:
           tags: ${{ steps.meta.outputs.tags }}
@@ -58,7 +58,7 @@ jobs:
         run: |
           echo '${{ github.server_url }}/${{ github.repository }}' > README.md
       - name: Update DockerHub description
-        uses: peter-evans/dockerhub-description@v4
+        uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa #v5.0.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
@@ -67,7 +67,7 @@ jobs:
         id: preferred
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          set -o pipefail
+          set -euo pipefail
           echo '${{ toJSON(fromJSON(steps.meta.outputs.json).tags) }}' \
             | jq -r 'map(select(startswith("ghcr.io") and (endswith("latest") | not))).[0]' \
             | xargs printf "tag=%s\n" \
