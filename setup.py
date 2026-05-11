@@ -27,7 +27,6 @@ setup(
     url='https://github.com/FNNDSC/pl-N4BiasFieldCorrection',
     py_modules=['n4wrapper'],
     install_requires=['chris_plugin'],
-    license='MIT',
     entry_points={
         'console_scripts': [
             'n4wrapper = n4wrapper:main'
