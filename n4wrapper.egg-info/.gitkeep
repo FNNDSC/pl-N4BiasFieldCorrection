@@ -1,0 +1,1 @@
+This directory exists so that it can be used as a mountpoint during `docker build`

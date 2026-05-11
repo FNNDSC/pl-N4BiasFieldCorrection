@@ -1,6 +1,5 @@
 *~
 *.DS_Store
-*.egg-info/
 __pycache__/
 
 .docker
@@ -9,3 +8,8 @@ __pycache__/
 .vscode/
 
 venv/
+
+build/*
+*.egg-info/*
+!build/.gitkeep
+!*.egg-info/.gitkeep
