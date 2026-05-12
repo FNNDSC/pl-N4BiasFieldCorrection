@@ -25,6 +25,7 @@ setup(
     author='FNNDSC',
     author_email='dev@babyMRI.org',
     url='https://github.com/FNNDSC/pl-N4BiasFieldCorrection',
+    license='MIT',
     py_modules=['n4wrapper'],
     install_requires=['chris_plugin'],
     entry_points={
