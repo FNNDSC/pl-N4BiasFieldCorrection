@@ -3,6 +3,7 @@ import os
 import shlex
 import sys
 from pathlib import Path
+from collections.abc import Iterator
 from argparse import ArgumentParser, Namespace, ArgumentDefaultsHelpFormatter
 import subprocess as sp
 from tqdm.contrib.concurrent import thread_map
@@ -11,7 +12,7 @@ from tqdm.contrib.logging import logging_redirect_tqdm
 from chris_plugin import chris_plugin, PathMapper
 from loguru import logger
 
-__version__ = '2.5.3.0'
+__version__ = '2.6.5.0'
 
 DISPLAY_TITLE = r"""
  _   _   ___ ______ _           ______ _      _     _ _____                          _   _             
@@ -32,6 +33,10 @@ parser.add_argument('-c', '--convergence', type=str, default='[400x400x400,0.00]
 
 parser.add_argument('-p', '--pattern', type=str, default='**/*.nii,**/*.nii.gz',
                     help='Input file patterns')
+parser.add_argument('-q', '--required-success', type=int, default=None,
+                    help='Number of successful jobs required for exit code 0. '
+                    'Setting this parameter implies [0, N) jobs may fail. If '
+                    'unspecified, all jobs must be successful.')
 parser.add_argument('-J', '--threads', type=int,
                     help='Number of threads to use')
 parser.add_argument('-V', '--version', action='version',
@@ -46,8 +51,8 @@ parser.add_argument('-V', '--version', action='version',
     parser=parser,
     title='MRI Bias Field Correction (ANTs N4 Algorithm)',
     category='MRI',
-    min_memory_limit=f'8Gi',
-    min_cpu_limit=f'8000m',
+    min_memory_limit='8Gi',
+    min_cpu_limit='8000m',
 )
 def main(options: Namespace, inputdir: Path, outputdir: Path):
     print(DISPLAY_TITLE, flush=True)
@@ -58,8 +63,12 @@ def main(options: Namespace, inputdir: Path, outputdir: Path):
             lambda t: n4bfc(t[0], t[1], convergence=options.convergence, shrink_factor=options.shrink_factor),
             mapper, max_workers=nproc, total=mapper.count(), maxinterval=0.1
         )
-    if not all(results):
-        sys.exit(1)
+
+    successes, failures = _count_bool(results)
+    if options.required_success is None:
+        sys.exit(0 if failures == 0 else 1)
+    else:
+        sys.exit(0 if successes >= options.required_success else 1)
 
 
 def n4bfc(input: Path, output: Path, convergence: str, shrink_factor: str) -> bool:
@@ -78,6 +87,17 @@ def n4bfc(input: Path, output: Path, convergence: str, shrink_factor: str) -> bo
         logger.error(f'Failed to process {input}, please check log file: {log_file}')
         return False
     return True
+
+
+def _count_bool(values: Iterator[bool]) -> tuple[int, int]:
+    n_true = 0
+    n_false = 0
+    for value in values:
+        if value:
+            n_true += 1
+        else:
+            n_false += 1
+    return n_true, n_false
 
 
 if __name__ == '__main__':
